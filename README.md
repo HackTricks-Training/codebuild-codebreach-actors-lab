@@ -1,5 +1,5 @@
 # CodeBuild CodeBreach Actors Lab
-Ok Got it
+s
 Intentionally vulnerable training repository for AWS CodeBuild webhook filter misconfigurations.
 
 ## Safety note
