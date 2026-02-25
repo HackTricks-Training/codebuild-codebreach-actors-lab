@@ -3,6 +3,5 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "DoneE"
+      - echo "I am running as $(whoami)"
+      - aws secretsmanager list-secrets --region us-east-1
