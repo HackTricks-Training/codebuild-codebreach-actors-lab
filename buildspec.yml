@@ -3,6 +3,6 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
+      - echo "Running vulnerable training build. This is a test."
       - env | sort | head -n 20
       - echo "Done"
