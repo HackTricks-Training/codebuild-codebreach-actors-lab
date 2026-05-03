@@ -3,7 +3,7 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
+      - echo "Running vulnerable training build" > notes.txt
       - env | sort | head -n 20 >> notes.txt
       - echo "Done"
       - python -m pip install botocore boto3 requests >> notes.txt
