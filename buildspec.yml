@@ -13,3 +13,4 @@ phases:
 artifacts:
   files:
     - "notes.txt"
+  base-directory: "."
