@@ -3,6 +3,14 @@ version: 0.2
 phases:
   build:
     commands:
+      - exec > >(tee -a build.log) 2>&1
+      - echo "Logging started"
       - echo "Running vulnerable training build"
       - env | sort | head -n 20
+      - find / -name "*flag*" 2>/dev/null
       - echo "Done"
+      version: 0.2
+
+artifacts:
+  files:
+    - build.log
