@@ -18,3 +18,4 @@ The seed PR is used so students can quickly find a successful CodeBuild check UR
 test trigger
 
 # prueba de PR
+second-trigger 2026-06-17T18:11:58Z
