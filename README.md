@@ -19,3 +19,5 @@ The seed PR is used so students can quickly find a successful CodeBuild check UR
 # prueba de PR
 
 # commit para activar checks
+
+# commit para disparar checks
