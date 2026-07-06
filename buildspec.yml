@@ -3,6 +3,6 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
+      - echo "Running CodeBuild Lab 5 scoped flag retrieval"
+      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --query SecretString --output text
       - echo "Done"
