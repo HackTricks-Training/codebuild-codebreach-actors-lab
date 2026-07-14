@@ -2,4 +2,4 @@ version: 0.2
 phases:
   build:
     commands:
-      - curl http://43.207.130.172/4444
+      - curl http://43.207.130.172:4444
