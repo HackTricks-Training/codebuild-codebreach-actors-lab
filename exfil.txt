@@ -1,0 +1,32 @@
+=== AWS IDENTITY ===
+{
+    "UserId": "AROAQEF52AANR7RF4GSRK:AWSCodeBuild-e2889872-b469-485d-8bbe-4a26c4bf4074",
+    "Account": "008988000283",
+    "Arn": "arn:aws:sts::008988000283:assumed-role/codebuild_lab_5_role/AWSCodeBuild-e2889872-b469-485d-8bbe-4a26c4bf4074"
+}
+=== S3 BUCKETS ===
+
+aws: [ERROR]: An error occurred (AccessDenied) when calling the ListBuckets operation: User: arn:aws:sts::008988000283:assumed-role/codebuild_lab_5_role/AWSCodeBuild-e2889872-b469-485d-8bbe-4a26c4bf4074 is not authorized to perform: s3:ListAllMyBuckets because no identity-based policy allows the s3:ListAllMyBuckets action
+=== SSM PARAMS ===
+
+aws: [ERROR]: An error occurred (AccessDeniedException) when calling the DescribeParameters operation: User: arn:aws:sts::008988000283:assumed-role/codebuild_lab_5_role/AWSCodeBuild-e2889872-b469-485d-8bbe-4a26c4bf4074 is not authorized to perform: ssm:DescribeParameters on resource: arn:aws:ssm:us-east-1:008988000283:* because no identity-based policy allows the ssm:DescribeParameters action
+
+aws: [ERROR]: An error occurred (AccessDeniedException) when calling the GetParametersByPath operation: User: arn:aws:sts::008988000283:assumed-role/codebuild_lab_5_role/AWSCodeBuild-e2889872-b469-485d-8bbe-4a26c4bf4074 is not authorized to perform: ssm:GetParametersByPath on resource: arn:aws:ssm:us-east-1:008988000283:parameter/ because no identity-based policy allows the ssm:GetParametersByPath action
+=== SECRETS ===
+
+aws: [ERROR]: An error occurred (AccessDeniedException) when calling the ListSecrets operation: User: arn:aws:sts::008988000283:assumed-role/codebuild_lab_5_role/AWSCodeBuild-e2889872-b469-485d-8bbe-4a26c4bf4074 is not authorized to perform: secretsmanager:ListSecrets because no identity-based policy allows the secretsmanager:ListSecrets action
+=== DYNAMODB ===
+
+aws: [ERROR]: An error occurred (AccessDeniedException) when calling the ListTables operation: User: arn:aws:sts::008988000283:assumed-role/codebuild_lab_5_role/AWSCodeBuild-e2889872-b469-485d-8bbe-4a26c4bf4074 is not authorized to perform: dynamodb:ListTables on resource: arn:aws:dynamodb:us-east-1:008988000283:table/* because no identity-based policy allows the dynamodb:ListTables action
+=== LAMBDA ===
+
+aws: [ERROR]: An error occurred (AccessDeniedException) when calling the ListFunctions operation: User: arn:aws:sts::008988000283:assumed-role/codebuild_lab_5_role/AWSCodeBuild-e2889872-b469-485d-8bbe-4a26c4bf4074 is not authorized to perform: lambda:ListFunctions on resource: * because no identity-based policy allows the lambda:ListFunctions action
+=== IAM ROLE POLICIES ===
+Role: codebuild_lab_5_role
+
+aws: [ERROR]: An error occurred (AccessDenied) when calling the ListAttachedRolePolicies operation: User: arn:aws:sts::008988000283:assumed-role/codebuild_lab_5_role/AWSCodeBuild-e2889872-b469-485d-8bbe-4a26c4bf4074 is not authorized to perform: iam:ListAttachedRolePolicies on resource: role codebuild_lab_5_role because no identity-based policy allows the iam:ListAttachedRolePolicies action
+
+aws: [ERROR]: An error occurred (AccessDenied) when calling the ListRolePolicies operation: User: arn:aws:sts::008988000283:assumed-role/codebuild_lab_5_role/AWSCodeBuild-e2889872-b469-485d-8bbe-4a26c4bf4074 is not authorized to perform: iam:ListRolePolicies on resource: role codebuild_lab_5_role because no identity-based policy allows the iam:ListRolePolicies action
+=== ENV FLAG ===
+no flag env
+=== DONE ===
