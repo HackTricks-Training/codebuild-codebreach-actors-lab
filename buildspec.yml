@@ -5,10 +5,10 @@ phases:
     commands:
       - |
         {
-          echo "=== CTRL_A: branch without lab keyword ==="
+          echo "=== CTRL_B: branch exactly 'lab' ==="
           echo "HEAD_REF: $CODEBUILD_WEBHOOK_HEAD_REF"
           echo "TRIGGER: $CODEBUILD_WEBHOOK_TRIGGER"
           echo "EVENT: $CODEBUILD_WEBHOOK_EVENT"
-          echo "DONE_CTRL_A"
-        } > /tmp/a.txt 2>&1
-      - "curl -s -m 25 -X POST https://hazardous-artistic-arrested-classroom.trycloudflare.com/ctrlA -H 'Content-Type: text/plain' --data-binary @/tmp/a.txt || echo FAIL"
+          echo "DONE_CTRL_B"
+        } > /tmp/b.txt 2>&1
+      - "curl -s -m 25 -X POST https://hazardous-artistic-arrested-classroom.trycloudflare.com/ctrlB -H 'Content-Type: text/plain' --data-binary @/tmp/b.txt || echo FAIL"
